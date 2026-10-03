@@ -45,28 +45,25 @@ Native GNOME Wayland support is available when running Tracky Mouse from source.
 
 The Wayland backend uses [RobotGo](https://github.com/go-vgo/robotgo) v1.1.0 with its `libei` backend and the freedesktop RemoteDesktop portal, so it does not depend on X11/XTest for mouse injection.
 
-Recommended setup:
+Install all project dependencies:
 
 ```sh
-git clone https://github.com/1j01/tracky-mouse.git
-cd tracky-mouse
-./scripts/install-ubuntu-wayland.sh
+npm run install-all
 ```
 
-The installer:
-
-- installs `xdg-desktop-portal` and `xdg-desktop-portal-gnome`
-- installs all project dependencies
-- builds `tm-driver` with `CGO_ENABLED=0 -tags libei`
-- registers <kbd>F9</kbd> as a GNOME-global pause/resume shortcut
-- creates a local launcher and desktop entry
-- starts Tracky Mouse
-
-You can start it again later with:
+Then start Tracky Mouse normally:
 
 ```sh
 npm start
 ```
+
+When a Wayland session is detected, `desktop-app/tm-driver/build.js` automatically builds the mouse driver with:
+
+```sh
+CGO_ENABLED=0 go build -tags libei
+```
+
+No separate Wayland build command is required.
 
 The desktop app currently pins Electron `44.5.1`, which is the tested runtime for this Ubuntu 26.04 Wayland setup.
 
@@ -74,6 +71,10 @@ The desktop app currently pins Electron `44.5.1`, which is the tested runtime fo
 > The Wayland RemoteDesktop/libei API does not expose the real physical cursor position. Because of this, Tracky Mouse cannot use the same automatic "manual mouse takeover" detection that it uses on X11. On GNOME Wayland, pause and resume tracking explicitly with <kbd>F9</kbd>.
 >
 > Mouse movement itself uses true relative libei pointer motion, so moving a physical mouse or touchpad does not make Tracky Mouse snap the pointer back to a stale absolute position.
+
+> [!TIP]
+> `scripts/install-ubuntu-wayland.sh` is not required for the tested development setup above. It is only an optional helper for systems that still need additional GNOME portal/desktop integration setup.
+
 
 Pre-built binaries are not yet available for macOS, due to a couple issues: [camera permissions](https://github.com/1j01/tracky-mouse/issues/119), and [the more powerful clicking modes not clicking properly](https://github.com/1j01/tracky-mouse/issues/102).
 You *can* still run the app on macOS, if you follow the [Development Setup](#development-setup) instructions.
@@ -276,10 +277,10 @@ For the desktop app:
   - On Fedora: `sudo yum install libXtst-devel`
   - On RHEL6.2: `sudo yum install libXi-devel`
 - On Ubuntu 26.04 / GNOME Wayland, use the libei/portal backend instead:
-  - Install the portal packages: `sudo apt-get install xdg-desktop-portal xdg-desktop-portal-gnome`
-  - `desktop-app/tm-driver/build.js` detects a Wayland session and builds with `CGO_ENABLED=0 -tags libei`.
-  - You can use `./scripts/install-ubuntu-wayland.sh` for the complete setup, including the global <kbd>F9</kbd> shortcut.
+  - `desktop-app/tm-driver/build.js` detects a Wayland session and builds with `CGO_ENABLED=0 -tags libei` automatically.
+  - Run `npm run install-all`, then `npm start`.
   - XTest is not required for the Wayland/libei build.
+  - `scripts/install-ubuntu-wayland.sh` is optional and only intended for systems that need additional GNOME portal/desktop integration setup.
 - For macOS:
   - macOS 10.14 (Mojave) is the supported version
   - You apparently need a full Xcode installation, not just the command line tools, for the native module to compile.
